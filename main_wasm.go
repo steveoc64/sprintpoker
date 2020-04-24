@@ -32,6 +32,8 @@ func main() {
 
 	rootBuilder := &Root{}
 
+	// get a list of users from server ?
+
 	for ok := true; ok; ok = renderer.EventWait() {
 
 		buildResults := buildEnv.RunBuild(rootBuilder)

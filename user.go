@@ -1,6 +1,7 @@
 package main
 
 type User struct {
-	Name string
+	Name   string
 	Status bool
+	Vote   string
 }
