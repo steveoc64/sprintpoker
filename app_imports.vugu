@@ -1,0 +1,10 @@
+<div></div>
+
+<script type="application/x-go">
+import (
+	"encoding/json"
+	"log"
+	"net/http"
+)
+type App_imports struct {}
+</script>

@@ -1,0 +1,29 @@
+<div>
+    <p>Waiting for everyone else to join now ...</p>
+    <ul class="list-group">
+        <li class='"list-group-item list-group-item-action"+c.UserStyle(value)'
+            vg-for='c.Users()'>
+            <h3 vg-html="value.Name"></h3>
+        </p>
+    </ul>
+</div>
+
+<style>
+</style>
+
+<script type="application/x-go">
+type Wait struct {
+    app *Poker
+}
+
+func (c *Wait) Users() []*Users {
+    return c.app.Users
+}
+
+func (c *Wait) UserStyle(u *User) string {
+    if u.Status {
+        return " active"
+    }
+
+}
+</script>

@@ -1,0 +1,9 @@
+<div>
+    Results component
+</div>
+
+<script type="application/x-go">
+type Results struct {
+     app  *Poker
+ }
+</script>

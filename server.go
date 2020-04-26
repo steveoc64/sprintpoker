@@ -1,4 +1,4 @@
-// +build ignore
+// +build !wasm
 
 package main
 
@@ -10,21 +10,26 @@ import (
 )
 
 func main() {
-	l := ":8080"
+	l := ":8081"
 	log.Printf("Starting Poker Server at %q", l)
 
 	wc := devutil.NewWasmCompiler().SetDir(".")
 
-	// build the routes
-	mux := devutil.NewMux()
-	mux.Match(devutil.NoFileExt, devutil.DefaultAutoReloadIndex.Replace(
-		`<!-- styles -->`,
-		`<link rel="stylesheet" href="bootstrap.min.css">`))
+	// boot up the API
+	usersAPI := newUsersAPI()
 
+	// build the routes and the special routes
+	mux := devutil.NewMux()
 	mux.Exact("/main.wasm", devutil.NewMainWasmHandler(wc))
 	mux.Exact("/wasm_exec.js", devutil.NewWasmExecJSHandler(wc))
-	mux.Exact()
+
+	// API routes
+	mux.Match(usersAPI, usersAPI)
+
+	// default cases
+	mux.Match(devutil.NoFileExt, newIndexHandler())
 	mux.Default(devutil.NewFileServer().SetDir("."))
 
+	// run the poker server
 	log.Fatal(http.ListenAndServe(l, mux))
 }

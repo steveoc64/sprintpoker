@@ -1,0 +1,9 @@
+<div>
+    Topic Setter Component
+</div>
+
+<script type="application/x-go">
+type Topic struct {
+     app  *Poker
+}
+</script>

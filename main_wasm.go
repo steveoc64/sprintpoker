@@ -30,18 +30,14 @@ func main() {
 	}
 	defer renderer.Release()
 
-	rootBuilder := &Root{}
-
-	// get a list of users from server ?
+	poker := NewPoker()
+	poker.LoadUsers()
 
 	for ok := true; ok; ok = renderer.EventWait() {
-
-		buildResults := buildEnv.RunBuild(rootBuilder)
-
+		buildResults := buildEnv.RunBuild(poker)
 		err = renderer.Render(buildResults)
 		if err != nil {
 			panic(err)
 		}
 	}
-
 }

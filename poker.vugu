@@ -1,0 +1,95 @@
+<div>
+    <main role="main" class="container text-center">
+        <div class="jumbotron shadow-lg">
+            <img src="poker.png" class="grow">
+            <h1 class="display-4 title">A*Team Planning Poker</h1>
+            <hr class="my-4">
+
+            <vg-comp expr="c.ActivePanel()"></vg-comp>
+        </div>
+    </main>
+    <footer>
+	    <img class="gopher" src="gowasm.png">
+    </footer>
+</div>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Amaranth:wght@700&display=swap');
+.title {
+    font-family: 'Amaranth', sans-serif;
+}
+
+.gopher {
+    position: fixed;
+    bottom: 20px;
+    right: 5%;
+    height: 80px;
+    z-index: 5;
+}
+
+.grow {
+    height: 100px;
+    animation-name: grow;
+    animation-duration: 3s;
+}
+
+@keyframes grow {
+    from {height: 10px;}
+    to   {height: 100px;}
+}
+</style>
+
+<script type="application/x-go">
+type AppState int
+
+const (
+	StateLogin AppState = iota
+	StateWaiting
+	StateSetTopic
+	StateVote
+	StateResults
+)
+
+// Poker Struct
+type Poker struct {
+	State        AppState
+	Users        []*User `vugu:"users" json:"users"`
+    Panel        map[AppState]vugu.Builder
+    built        bool
+}
+
+func NewPoker() *Poker {
+    c := &Poker{
+        State: StateLogin,
+        Users: []*User{},
+        Panel: make(map[AppState]vugu.Builder),
+    }
+    c.Panel[StateLogin] = &Login{app: c}
+    c.Panel[StateWaiting] = &Wait{app: c}
+    c.Panel[StateSetTopic] = &Topic{app: c}
+    c.Panel[StateVote] = &Vote{app: c}
+    c.Panel[StateResults] = &Results{app: c}
+    return c
+}
+
+func (c *Poker) ActivePanel() vugu.Builder {
+    return c.Panel[c.State]
+}
+
+func (c *Poker) LoadUsers() {
+	res, err := http.Get("/api/v1/users")
+	if err != nil {
+		log.Printf("Error fetching users: %v", err)
+		return
+	}
+	defer res.Body.Close()
+
+	println("got body", res.Body)
+	err = json.NewDecoder(res.Body).Decode(&c.Users)
+	if err != nil {
+		log.Printf("Error JSON decoding: %v", err)
+		return
+	}
+}
+
+</script>

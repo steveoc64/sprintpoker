@@ -1,0 +1,9 @@
+<div>
+    Vote component
+</div>
+
+<script type="application/x-go">
+type Vote struct {
+    app  *Poker
+}
+</script>

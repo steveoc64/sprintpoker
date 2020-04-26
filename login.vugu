@@ -1,0 +1,69 @@
+<div>
+    <p>Select your identity below to join the Planning Session.</p>
+    <ul class="list-group">
+        <li :class='"list-group-item list-group-item-action"+c.ActiveClass(value.Name)'
+            @click='c.SetUser(value.Name)'
+            vg-for='c.Users()'>
+            <h2 vg-html="value.Name"></h2>
+        </p>
+    </ul>
+    <a :class='"btn btn-primary btn-lg"+c.LoginClass()'
+        href="#"
+        role="button"
+        @click='c.Login()'>
+        Join Planning Session
+    </a>
+</div>
+
+<style>
+</style>
+
+<script type="application/x-go">
+type Login struct {
+    app *Poker
+	User string
+}
+
+func (c *Login) Users() []*User {
+    return c.app.Users
+}
+
+func (c *Login) SetUser(user string) {
+    println("setuser", user, "from", c.User)
+	if c.User == user {
+        println("clearing it out")
+		c.User = ""
+		return
+	}
+    println("setting it now")
+	c.User = user
+    println("setted", user, "->", c.User)
+}
+
+func (c *Login) LoginClass() string {
+	if c.User == "" {
+		return " disabled"
+	}
+	return ""
+}
+
+func (c *Login) Login() {
+	if c.User != "" {
+		// hit the server with our login creds, then go to the waiting screen
+		c.app.State = StateWaiting
+	}
+}
+
+func (c *Login) ActiveClass(user string) string {
+    println("is active", user, ":", c.User)
+	if c.User == "" {
+		return ""
+	}
+	if user == c.User {
+        println("yes")
+		return " active"
+	}
+	return ""
+}
+
+</script>
