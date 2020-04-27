@@ -91,7 +91,7 @@ func (c *Wait) AddUser(event vugu.DOMEvent) {
 }
 
 func (c *Wait) StartNow(event vugu.DOMEvent) {
-    c.app.State = StateSetTopic
+    c.app.StartNow()
 }
 
 func (c *Wait) NewUser(event vugu.DOMEvent) {

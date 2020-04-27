@@ -45,7 +45,7 @@ func main() {
 	fmt.Printf("wss %T %v\n", wss, wss)
 
 	wss.Call("addEventListener", "message", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		println("got a msg on the websocket", this.String(), len(args))
+		println("got a msg on the websocket", this.String(), this.Type(), len(args))
 		poker.Load()
 		return nil
 	}))

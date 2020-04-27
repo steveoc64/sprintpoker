@@ -1,19 +1,46 @@
 <div>
-    Topic Setter Component
-     <a class="btn btn-success btn-lg"
+    <p>Set the topic ...</p>
+    <ul class="list-group">
+        <li class='list-group-item list-group-item-action'>
+            <input class="topic" id="topic" @change="c.SetTopic(event)" :value="c.app.Topic">
+        </li>
+    </ul>
+    <a class="btn btn-success btn-lg"
         href="#"
         role="button"
-        @click='c.SetTopic()'>
-        Set Topic
+        @click='c.StartVote(event)'>
+        Start Vote
     </a>
+    <script>
+        document.getElementById("topic").focus()
+    </script>
 </div>
+
+<style>
+.topic {
+  font-size: 2em;
+  height: 2em;
+  width: 100%;
+}
+</style>
 
 <script type="application/x-go">
 type Topic struct {
      app  *Poker
 }
 
-func (c *Topic) SetTopic() {
-    c.app.State = StateVote
+func (c *Topic) SetTopic(event vugu.DOMEvent) {
+    topic := ""
+    el := js.Global().Get("document").Call("getElementById", "topic")
+    if el.IsNull() {
+        return
+    }
+    topic = el.Get("value").String()
+    println("topic seems to be", topic)
+    c.app.SetTopic(topic)
+}
+
+func (c *Topic) StartVote(event vugu.DOMEvent) {
+    c.app.StartVote()
 }
 </script>

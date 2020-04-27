@@ -1,6 +1,21 @@
 <div>
-    Vote component
-     <a class="btn btn-success btn-lg"
+    <h2 vg-html="c.app.Topic" class="text-primary"></h2>
+    <ul class="list-group">
+        <li :class='"list-group-item list-group-item-action disabled"+c.UserStyle(value)'
+            vg-if="value.Status"
+            vg-for="c.Users()">
+                <span class="name" vg-html="value.Name"></span>
+                <span class="name" vg-html="value.Vote"></span>
+        </li>
+    </ul>
+    <div class="btn-group" role="group" aria-label="Vote">
+        <button type="button" class="btn btn-secondary votebtn"
+            @click="c.vote = value"
+            vg-for="votes"
+            vg-html=value></button>
+    </div>
+    <p></p>
+    <a class="btn btn-success btn-lg"
         href="#"
         role="button"
         @click='c.CastVote()'>
@@ -8,13 +23,37 @@
     </a>
 </div>
 
+<style>
+.name {
+    font-size: 1.6em;
+    height: 1.6em;
+    width: 80%;
+}
+.votebtn {
+    font-size: 1.8em;
+}
+</style>
+
 <script type="application/x-go">
+var votes = []string{"XS","S","S-M","M","M-L","L","XL"}
 type Vote struct {
     app  *Poker
+    vote string
+}
+
+func (c *Vote) Users() []*User {
+    return c.app.Users
+}
+
+func (c *Vote) UserStyle(user *User) string {
+    if user.Vote == "" {
+        return " text-warning"
+    }
+    return " text-success"
 }
 
 func (c *Vote) CastVote() {
-    c.app.State = StateResults
+    c.app.CastVote(c.vote)
 }
 
 </script>

@@ -2,29 +2,51 @@
 
 package main
 
+import (
+	"fmt"
+
+	"github.com/BurntSushi/toml"
+)
+
 type DataModel struct {
-	users     []*User `json:"users"`
-	listeners []chan bool
+	State     AppState    `json:"state"`
+	Topic     string      `json:"topic"`
+	Users     []*User     `json:"users"`
+	listeners []chan bool `json:"-"`
 }
 
 func NewDataModel() *DataModel {
-	return &DataModel{}
+	d := &DataModel{}
+	config := make(map[string]interface{})
+	if _, err := toml.DecodeFile("config.toml", &config); err != nil {
+		// fallback to default install
+		if _, err := toml.DecodeFile("/usr/local/etc/poker.toml", &config); err != nil {
+			fmt.Println(err)
+			return d
+		}
+	}
+	for _, v := range config["users"].([]interface{}) {
+		d.Users = append(d.Users, &User{
+			Name: v.(string),
+		})
+	}
+	return d
 }
 
 func (d *DataModel) Login(user string) {
-	for _, v := range d.users {
+	for _, v := range d.Users {
 		if v.Name == user {
 			v.Status = true
-			d.Update("login")
+			d.Update("login " + user)
 		}
 	}
 }
 
 func (d *DataModel) Logout(user string) {
-	for _, v := range d.users {
+	for _, v := range d.Users {
 		if v.Name == user {
 			v.Status = false
-			d.Update("login")
+			d.Update("logout " + user)
 		}
 	}
 }
@@ -43,6 +65,18 @@ func (d *DataModel) Listen() chan bool {
 }
 
 func (d *DataModel) AppendUser(user *User) {
-	d.users = append(d.users, user)
-	d.Update("append user")
+	d.Users = append(d.Users, user)
+	d.Update("append user " + user.Name)
+}
+
+func (d *DataModel) SetState(state AppState) {
+	d.State = state
+	println("setting state", state)
+	d.Update("state")
+}
+
+func (d *DataModel) SetTopic(topic string) {
+	d.Topic = topic
+	println("setting topic", topic)
+	d.Update("topic set")
 }

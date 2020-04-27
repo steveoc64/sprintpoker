@@ -20,14 +20,13 @@ func main() {
 
 	// create the datamodel and APIs
 	dataModel := NewDataModel()
-	usersAPI := NewUsersAPI(dataModel)
 	socketHandler := NewSocketHandler(dataModel)
 
 	// build the routes and the special routes
 	mux := devutil.NewMux()
 
 	// API and common routes
-	mux.Match(usersAPI, usersAPI)
+	mux.Match(dataModel, dataModel)
 
 	// add websocket handler
 	mux.Match(socketHandler, websocket.Handler(func(conn *websocket.Conn) {
@@ -36,7 +35,7 @@ func main() {
 		for {
 			select {
 			case <-data:
-				println("the data model has changed")
+				println("->")
 				conn.Write([]byte(time.Now().String()))
 			}
 		}

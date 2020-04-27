@@ -58,7 +58,8 @@ const (
 
 // Poker Struct
 type Poker struct {
-	State        AppState
+	State        AppState `json:"state"`
+    Topic        string `json:"topic"`
 	Users        []*User `vugu:"users" json:"users"`
     Panel        map[AppState]vugu.Builder
     built        bool
@@ -89,22 +90,35 @@ func (c *Poker) ActivePanel() vugu.Builder {
 
 func (c *Poker) Load() {
     go func() {
-        res, err := http.Get("/api/v1/users")
+        res, err := http.Get("/api/v1")
         if err != nil {
             log.Printf("Error fetching users: %v", err)
             return
         }
         defer res.Body.Close()
 
-        err = json.NewDecoder(res.Body).Decode(&c.Users)
+        p := &Poker{}
+        err = json.NewDecoder(res.Body).Decode(&p)
         if err != nil {
             log.Printf("Error JSON decoding: %v", err)
             return
         }
+        c.State = p.State
+        c.Topic = p.Topic
+        c.Users = p.Users
+        gotOne := false
         for _,v := range c.Users {
             if c.loginUser != nil && v.Name == c.loginUser.Name {
                 c.loginUser = v
+                gotOne = true
+                break
             }
+        }
+        if !gotOne {
+            c.loginUser = nil
+            c.State = StateLogin
+        } else if c.State < StateWaiting {
+            c.State = StateWaiting
         }
         c.repaintQ <- true
     }()
@@ -161,4 +175,64 @@ func (c *Poker) Logout() {
         c.State = StateLogin
     }()
 }
+
+func (c *Poker) StartNow() {
+    c.State = StateSetTopic
+    go func() {
+        res, err := http.PostForm("/api/v1/start/topic", url.Values{
+            "user": {c.loginUser.Name},
+        })
+        if err != nil {
+            log.Printf("Error posting start topic: %v", err)
+            return
+        }
+        defer res.Body.Close()
+        if body,err := ioutil.ReadAll(res.Body); err == nil {
+            log.Printf("Start Response: %v", string(body))
+        }
+    }()
+}
+
+func (c *Poker) SetTopic(topic string) {
+    c.State = StateSetTopic
+    c.Topic = topic
+    go func() {
+        res, err := http.PostForm("/api/v1/topic", url.Values{
+            "user": {c.loginUser.Name},
+            "topic": {topic},
+        })
+        if err != nil {
+            log.Printf("Error posting topic: %v", err)
+            return
+        }
+        defer res.Body.Close()
+        if body,err := ioutil.ReadAll(res.Body); err == nil {
+            log.Printf("Topic Response: %v", string(body))
+        }
+    }()
+}
+
+func (c *Poker) StartVote() {
+    c.State = StateVote
+    go func() {
+        res, err := http.PostForm("/api/v1/start/vote", url.Values{
+            "user": {c.loginUser.Name},
+        })
+        if err != nil {
+            log.Printf("Error posting start vote: %v", err)
+            return
+        }
+        defer res.Body.Close()
+        if body,err := ioutil.ReadAll(res.Body); err == nil {
+            log.Printf("Start Vote Response: %v", string(body))
+        }
+    }()
+}
+
+func (c *Poker) CastVote(vote string) {
+    println("casting vote", vote)
+    c.loginUser.Vote = vote
+
+}
+
 </script>
