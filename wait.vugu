@@ -1,29 +1,128 @@
 <div>
     <p>Waiting for everyone else to join now ...</p>
     <ul class="list-group">
-        <li class='"list-group-item list-group-item-action"+c.UserStyle(value)'
+        <li :class='"list-group-item list-group-item-action"+c.UserStyle(value)'
+            vg-if='!value.Status'
             vg-for='c.Users()'>
-            <h3 vg-html="value.Name"></h3>
-        </p>
+                <span class="name" vg-html="value.Name"></span>
+                <img class="spinner" src="blue-loading-gif-transparent-8.gif">
+        </li>
+        <li class='list-group-item list-group-item-action'
+            vg-if='c.adding'>
+            <input class="addUser" id="newuser" @change="c.NewUser(event)">
+        </li>
     </ul>
+    <a class="btn btn-success btn-lg"
+        href="#"
+        role="button"
+        @click='c.StartNow(event)'>
+        Start Now
+    </a>
+     <a class="btn btn-primary btn-lg"
+        href="#"
+        role="button"
+        @click='c.AddUser(event)'>
+        Add User
+    </a>
+     <a class="btn btn-danger btn-lg"
+        href="#"
+        role="button"
+        @click='c.Quit(event)'>
+        Quit
+    </a>
 </div>
 
 <style>
+.name {
+    font-size: 2em;
+    height: 2em;
+    width: 80%;
+}
+.spinner {
+    height: 3em;
+    padding-left: 12em;
+}
+.addUser {
+  font-size: 2em;
+  height: 2em;
+  width: 100%;
+}
 </style>
 
 <script type="application/x-go">
+import "time"
+import "strings"
 type Wait struct {
     app *Poker
+    adding bool
 }
 
-func (c *Wait) Users() []*Users {
+func (c *Wait) Users() []*User {
     return c.app.Users
 }
 
 func (c *Wait) UserStyle(u *User) string {
     if u.Status {
-        return " active"
+        return " text-success"
     }
+    return " text-warning"
+}
 
+func (c *Wait) Quit(event vugu.DOMEvent) {
+    go func() {
+        event.EventEnv().Lock()
+        c.app.Logout()
+        event.EventEnv().UnlockRender()
+    }()
+}
+
+func (c *Wait) AddUser(event vugu.DOMEvent) {
+    c.adding = true
+
+    go func() {
+        time.Sleep(10*time.Millisecond)
+        event.EventEnv().Lock()
+        el := js.Global().Get("document").Call("getElementById", "newuser")
+        if !el.IsNull() {
+            el.Call("focus")
+        }
+        event.EventEnv().UnlockRender()
+    }()
+}
+
+func (c *Wait) StartNow(event vugu.DOMEvent) {
+    c.app.State = StateSetTopic
+}
+
+func (c *Wait) NewUser(event vugu.DOMEvent) {
+    c.adding = false
+    user := ""
+    el := js.Global().Get("document").Call("getElementById", "newuser")
+    if el.IsNull() {
+        return
+    }
+    user = strings.Title(el.Get("value").String())
+
+    go func() {
+        // tell the backend about the new thing
+        event.EventEnv().Lock()
+        res, err := http.PostForm("/api/v1/users/add", url.Values{
+            "user": {user},
+        })
+        if err != nil {
+            log.Printf("Error posting new user: %v", err)
+            event.EventEnv().UnlockRender()
+            return
+        }
+        defer res.Body.Close()
+        if body,err := ioutil.ReadAll(res.Body); err == nil {
+            log.Printf("Add User Response: %v", string(body))
+        }
+        event.EventEnv().UnlockRender()
+
+        c.app.Users = append(c.app.Users, &User{
+            Name: user,
+        })
+    }()
 }
 </script>

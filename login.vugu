@@ -1,16 +1,16 @@
 <div>
     <p>Select your identity below to join the Planning Session.</p>
     <ul class="list-group">
-        <li :class='"list-group-item list-group-item-action"+c.ActiveClass(value.Name)'
-            @click='c.SetUser(value.Name)'
+        <li :class='"list-group-item list-group-item-action"+c.ActiveClass(value)'
+            @click='c.SetUser(value)'
             vg-for='c.Users()'>
-            <h2 vg-html="value.Name"></h2>
+            <h4 vg-html="value.Name"></h4>
         </p>
     </ul>
     <a :class='"btn btn-primary btn-lg"+c.LoginClass()'
         href="#"
         role="button"
-        @click='c.Login()'>
+        @click='c.Login(event)'>
         Join Planning Session
     </a>
 </div>
@@ -19,51 +19,49 @@
 </style>
 
 <script type="application/x-go">
+import "net/http"
+import "io/ioutil"
+
 type Login struct {
     app *Poker
-	User string
+	User *User
 }
 
 func (c *Login) Users() []*User {
     return c.app.Users
 }
 
-func (c *Login) SetUser(user string) {
-    println("setuser", user, "from", c.User)
+func (c *Login) SetUser(user *User) {
+    println("settin user", user.Name)
 	if c.User == user {
-        println("clearing it out")
-		c.User = ""
+		c.User = nil
 		return
 	}
-    println("setting it now")
 	c.User = user
-    println("setted", user, "->", c.User)
 }
 
 func (c *Login) LoginClass() string {
-	if c.User == "" {
+	if c.User == nil {
 		return " disabled"
 	}
 	return ""
 }
 
-func (c *Login) Login() {
-	if c.User != "" {
-		// hit the server with our login creds, then go to the waiting screen
-		c.app.State = StateWaiting
+func (c *Login) Login(event vugu.DOMEvent) {
+	if c.User != nil {
+        c.app.Login(c.User.Name)
 	}
 }
 
-func (c *Login) ActiveClass(user string) string {
-    println("is active", user, ":", c.User)
-	if c.User == "" {
-		return ""
-	}
+func (c *Login) ActiveClass(user *User) string {
+    class := ""
+    if user.Status {
+        class = class + " text-success"
+    }
 	if user == c.User {
-        println("yes")
-		return " active"
+		class = class + " active"
 	}
-	return ""
+	return class
 }
 
 </script>

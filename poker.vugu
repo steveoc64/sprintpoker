@@ -40,6 +40,12 @@
 </style>
 
 <script type="application/x-go">
+import (
+    "log"
+    "net/http"
+    "encoding/json"
+    "net/url"
+)
 type AppState int
 
 const (
@@ -56,19 +62,24 @@ type Poker struct {
 	Users        []*User `vugu:"users" json:"users"`
     Panel        map[AppState]vugu.Builder
     built        bool
+    loginUser    *User
+    repaintQ     chan bool
 }
 
-func NewPoker() *Poker {
+func NewPoker(repaintQ chan bool) *Poker {
     c := &Poker{
         State: StateLogin,
         Users: []*User{},
         Panel: make(map[AppState]vugu.Builder),
+        repaintQ: repaintQ,
     }
     c.Panel[StateLogin] = &Login{app: c}
     c.Panel[StateWaiting] = &Wait{app: c}
     c.Panel[StateSetTopic] = &Topic{app: c}
     c.Panel[StateVote] = &Vote{app: c}
     c.Panel[StateResults] = &Results{app: c}
+
+    c.Load()
     return c
 }
 
@@ -76,20 +87,78 @@ func (c *Poker) ActivePanel() vugu.Builder {
     return c.Panel[c.State]
 }
 
-func (c *Poker) LoadUsers() {
-	res, err := http.Get("/api/v1/users")
-	if err != nil {
-		log.Printf("Error fetching users: %v", err)
-		return
-	}
-	defer res.Body.Close()
+func (c *Poker) Load() {
+    go func() {
+        res, err := http.Get("/api/v1/users")
+        if err != nil {
+            log.Printf("Error fetching users: %v", err)
+            return
+        }
+        defer res.Body.Close()
 
-	println("got body", res.Body)
-	err = json.NewDecoder(res.Body).Decode(&c.Users)
-	if err != nil {
-		log.Printf("Error JSON decoding: %v", err)
-		return
-	}
+        err = json.NewDecoder(res.Body).Decode(&c.Users)
+        if err != nil {
+            log.Printf("Error JSON decoding: %v", err)
+            return
+        }
+        for _,v := range c.Users {
+            if c.loginUser != nil && v.Name == c.loginUser.Name {
+                c.loginUser = v
+            }
+        }
+        c.repaintQ <- true
+    }()
 }
 
+func (c *Poker) Login(userName string) {
+    c.Logout()
+    for _,v := range c.Users {
+        if v.Name == userName {
+            go func() {
+                res, err := http.PostForm("/api/v1/users/login", url.Values{
+                    "user": {userName},
+                })
+                if err != nil {
+                    log.Printf("Error posting login: %v", err)
+                    return
+                }
+                defer res.Body.Close()
+                if body,err := ioutil.ReadAll(res.Body); err == nil {
+                    log.Printf("Login Response: %v", string(body))
+                }
+                c.loginUser = v
+                v.Status = true
+                c.State = StateWaiting
+                c.repaintQ <- true
+            }()
+        }
+    }
+}
+
+func (c *Poker) Logout() {
+    go func() {
+        if c.loginUser != nil {
+            res, err := http.PostForm("/api/v1/users/logout", url.Values{
+                "user": {c.loginUser.Name},
+            })
+            if err != nil {
+                log.Printf("Error posting logout: %v", err)
+                return
+            }
+            defer res.Body.Close()
+            if body,err := ioutil.ReadAll(res.Body); err == nil {
+                log.Printf("Logout Response: %v", string(body))
+            }
+        }
+        if v,ok := c.Panel[StateLogin].(*Login); ok {
+            // clear the current user on the login panel
+            v.User = nil
+        }
+        if c.loginUser != nil {
+            c.loginUser.Status = false
+        }
+        c.loginUser = nil
+        c.State = StateLogin
+    }()
+}
 </script>

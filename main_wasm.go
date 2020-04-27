@@ -4,8 +4,10 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"flag"
+	"syscall/js"
 
 	"github.com/vugu/vugu"
 	"github.com/vugu/vugu/domrender"
@@ -30,14 +32,41 @@ func main() {
 	}
 	defer renderer.Release()
 
-	poker := NewPoker()
-	poker.LoadUsers()
+	repaintQ := make(chan bool, 1000)
+	poker := NewPoker(repaintQ)
+
+	home := js.Global().Get("window").Get("location").Get("href").String()
+	fmt.Printf("home is %+v\n", home)
+	wsURL := strings.Replace(strings.Replace(home, "http://", "ws://", 1), "#", "ws", -1)
+
+	ws := js.Global().Get("WebSocket")
+	fmt.Printf("ws %T %v\n", ws, ws)
+	wss := ws.New(wsURL)
+	fmt.Printf("wss %T %v\n", wss, wss)
+
+	wss.Call("addEventListener", "message", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		println("got a msg on the websocket", this.String(), len(args))
+		poker.Load()
+		return nil
+	}))
+
+	// build all the things either due to an event, or
+	// something else that manually updates the app state
+	go func() {
+		for {
+			select {
+			case <-repaintQ:
+				buildResults := buildEnv.RunBuild(poker)
+				err = renderer.Render(buildResults)
+				if err != nil {
+					panic(err)
+				}
+			}
+		}
+	}()
 
 	for ok := true; ok; ok = renderer.EventWait() {
-		buildResults := buildEnv.RunBuild(poker)
-		err = renderer.Render(buildResults)
-		if err != nil {
-			panic(err)
-		}
+		repaintQ <- true
 	}
+
 }

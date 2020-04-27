@@ -1,9 +1,19 @@
 <div>
     Topic Setter Component
+     <a class="btn btn-success btn-lg"
+        href="#"
+        role="button"
+        @click='c.SetTopic()'>
+        Set Topic
+    </a>
 </div>
 
 <script type="application/x-go">
 type Topic struct {
      app  *Poker
+}
+
+func (c *Topic) SetTopic() {
+    c.app.State = StateVote
 }
 </script>
