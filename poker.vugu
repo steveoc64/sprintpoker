@@ -94,7 +94,6 @@ func (c *Poker) Load() {
         if c.loginUser != nil {
             url = url + "?u=" + c.loginUser.Name
         }
-        println("doing a load", url)
         res, err := http.Get(url)
         if err != nil {
             log.Printf("Error fetching users: %v", err)
@@ -111,7 +110,6 @@ func (c *Poker) Load() {
         loginName := ""
         loginStatus := false
         if c.loginUser != nil {
-            println("saving login user", c.loginUser.Name, c.loginUser.Status)
             loginName = c.loginUser.Name
             loginStatus = c.loginUser.Status
         }
@@ -121,19 +119,15 @@ func (c *Poker) Load() {
         c.Users = p.Users
         gotOne := false
         for _,v := range c.Users {
-            println("consider", v.Name)
             if v.Name == loginName {
-                println("on load, finding that",v.Name,"is",loginName)
                 c.loginUser = v
                 gotOne = true
                 break
             }
         }
         if !gotOne {
-            println("got none")
             c.State = StateLogin
         } else if c.State < StateWaiting {
-            println("got some", c.State, loginStatus)
             c.State = StateWaiting
             c.loginUser.Status = loginStatus
         }
@@ -148,7 +142,6 @@ func (c *Poker) Login(userName string) {
     go func() {
         for _,v := range c.Users {
             if v.Name == userName {
-                    println("setting loginUser to", v.Name, "from", userName)
                     res, err := http.PostForm("/api/v1/users/login", url.Values{
                         "user": {userName},
                     })
@@ -172,7 +165,6 @@ func (c *Poker) Login(userName string) {
 func (c *Poker) Logout() {
     go func() {
         if c.loginUser != nil {
-            println("logging out", c.loginUser.Name)
             res, err := http.PostForm("/api/v1/users/logout", url.Values{
                 "user": {c.loginUser.Name},
             })
@@ -251,7 +243,6 @@ func (c *Poker) StartVote() {
 }
 
 func (c *Poker) CastVote(vote string) {
-    println("casting vote", vote)
     c.loginUser.Vote = vote
     go func() {
         res, err := http.PostForm("/api/v1/vote", url.Values{

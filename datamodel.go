@@ -52,7 +52,6 @@ func (d *DataModel) Logout(user string) {
 }
 
 func (d *DataModel) Update(why string) {
-	println("updating because", why, len(d.listeners))
 	for _, v := range d.listeners {
 		v <- true
 	}
@@ -71,13 +70,11 @@ func (d *DataModel) AppendUser(user *User) {
 
 func (d *DataModel) SetState(state AppState) {
 	d.State = state
-	println("setting state", state)
 	d.Update("state")
 }
 
 func (d *DataModel) SetTopic(topic string) {
 	d.Topic = topic
-	println("setting topic", topic)
 	d.Update("topic set")
 }
 

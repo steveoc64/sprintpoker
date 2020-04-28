@@ -36,7 +36,6 @@ func (c *Topic) SetTopic(event vugu.DOMEvent) {
         return
     }
     topic = el.Get("value").String()
-    println("topic seems to be", topic)
     c.app.SetTopic(topic)
 }
 

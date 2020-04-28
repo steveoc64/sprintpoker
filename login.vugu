@@ -32,7 +32,6 @@ func (c *Login) Users() []*User {
 }
 
 func (c *Login) SetUser(user *User) {
-    println("settin user", user.Name)
 	if c.User == user {
 		c.User = nil
 		return
@@ -49,7 +48,6 @@ func (c *Login) LoginClass() string {
 
 func (c *Login) Login(event vugu.DOMEvent) {
 	if c.User != nil {
-        println("but here at login, user is", c.User.Name)
         c.app.Login(c.User.Name)
 	}
 }
