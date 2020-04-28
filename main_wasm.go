@@ -36,16 +36,12 @@ func main() {
 	poker := NewPoker(repaintQ)
 
 	home := js.Global().Get("window").Get("location").Get("href").String()
-	fmt.Printf("home is %+v\n", home)
 	wsURL := strings.Replace(strings.Replace(home, "http://", "ws://", 1), "#", "", -1) + "ws"
 
 	ws := js.Global().Get("WebSocket")
-	fmt.Printf("ws %T %v\n", ws, ws)
 	wss := ws.New(wsURL)
-	fmt.Printf("wss %T %v\n", wss, wss)
 
 	wss.Call("addEventListener", "message", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		println("got a msg on the websocket", this.String(), this.Type(), len(args))
 		poker.Load()
 		return nil
 	}))
