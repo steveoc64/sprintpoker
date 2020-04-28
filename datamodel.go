@@ -80,3 +80,13 @@ func (d *DataModel) SetTopic(topic string) {
 	println("setting topic", topic)
 	d.Update("topic set")
 }
+
+func (d *DataModel) CastVote(user, vote string) {
+	for _, v := range d.Users {
+		if v.Name == user {
+			v.Vote = vote
+			d.Update("cast vote")
+			return
+		}
+	}
+}

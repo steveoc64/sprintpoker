@@ -1,11 +1,11 @@
 <div>
-    <h2 vg-html="c.app.Topic" class="text-primary"></h2>
+    <h2 vg-html="c.app.Topic" class=""></h2>
     <ul class="list-group">
-        <li :class='"list-group-item list-group-item-action disabled"+c.UserStyle(value)'
+        <li class="list-group-item list-group-item-action disabled"
             vg-if="value.Status"
             vg-for="c.Users()">
-                <span class="name" vg-html="value.Name"></span>
-                <span class="name" vg-html="value.Vote"></span>
+                <span :class='"name"+c.UserStyle(value)' vg-html="value.Name"></span>
+                <span class="vote" vg-html="value.Vote"></span>
         </li>
     </ul>
     <div class="btn-group" role="group" aria-label="Vote">
@@ -26,8 +26,13 @@
 <style>
 .name {
     font-size: 1.6em;
-    height: 1.6em;
+    height: 2em;
     width: 80%;
+}
+.vote {
+    font-size: 2em;
+    height: 2em;
+    padding-left: 4em;
 }
 .votebtn {
     font-size: 1.8em;
@@ -46,6 +51,9 @@ func (c *Vote) Users() []*User {
 }
 
 func (c *Vote) UserStyle(user *User) string {
+    if user == c.app.loginUser {
+        return " text-info"
+    }
     if user.Vote == "" {
         return " text-warning"
     }
@@ -55,5 +63,4 @@ func (c *Vote) UserStyle(user *User) string {
 func (c *Vote) CastVote() {
     c.app.CastVote(c.vote)
 }
-
 </script>

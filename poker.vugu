@@ -90,7 +90,12 @@ func (c *Poker) ActivePanel() vugu.Builder {
 
 func (c *Poker) Load() {
     go func() {
-        res, err := http.Get("/api/v1")
+        url := "/api/v1"
+        if c.loginUser != nil {
+            url = url + "?u=" + c.loginUser.Name
+        }
+        println("doing a load", url)
+        res, err := http.Get(url)
         if err != nil {
             log.Printf("Error fetching users: %v", err)
             return
@@ -103,55 +108,71 @@ func (c *Poker) Load() {
             log.Printf("Error JSON decoding: %v", err)
             return
         }
+        loginName := ""
+        loginStatus := false
+        if c.loginUser != nil {
+            println("saving login user", c.loginUser.Name, c.loginUser.Status)
+            loginName = c.loginUser.Name
+            loginStatus = c.loginUser.Status
+        }
+        c.loginUser = nil
         c.State = p.State
         c.Topic = p.Topic
         c.Users = p.Users
         gotOne := false
         for _,v := range c.Users {
-            if c.loginUser != nil && v.Name == c.loginUser.Name {
+            println("consider", v.Name)
+            if v.Name == loginName {
+                println("on load, finding that",v.Name,"is",loginName)
                 c.loginUser = v
                 gotOne = true
                 break
             }
         }
         if !gotOne {
-            c.loginUser = nil
+            println("got none")
             c.State = StateLogin
         } else if c.State < StateWaiting {
+            println("got some", c.State, loginStatus)
             c.State = StateWaiting
+            c.loginUser.Status = loginStatus
         }
         c.repaintQ <- true
     }()
 }
 
 func (c *Poker) Login(userName string) {
-    c.Logout()
-    for _,v := range c.Users {
-        if v.Name == userName {
-            go func() {
-                res, err := http.PostForm("/api/v1/users/login", url.Values{
-                    "user": {userName},
-                })
-                if err != nil {
-                    log.Printf("Error posting login: %v", err)
-                    return
-                }
-                defer res.Body.Close()
-                if body,err := ioutil.ReadAll(res.Body); err == nil {
-                    log.Printf("Login Response: %v", string(body))
-                }
-                c.loginUser = v
-                v.Status = true
-                c.State = StateWaiting
-                c.repaintQ <- true
-            }()
-        }
+    if c.loginUser != nil {
+        c.Logout()
     }
+    go func() {
+        for _,v := range c.Users {
+            if v.Name == userName {
+                    println("setting loginUser to", v.Name, "from", userName)
+                    res, err := http.PostForm("/api/v1/users/login", url.Values{
+                        "user": {userName},
+                    })
+                    if err != nil {
+                        log.Printf("Error posting login: %v", err)
+                        return
+                    }
+                    defer res.Body.Close()
+                    if body,err := ioutil.ReadAll(res.Body); err == nil {
+                        log.Printf("Login Response: %v", string(body))
+                    }
+                    c.loginUser = v
+                    v.Status = true
+                    c.State = StateWaiting
+                    c.repaintQ <- true
+            }
+        }
+    }()
 }
 
 func (c *Poker) Logout() {
     go func() {
         if c.loginUser != nil {
+            println("logging out", c.loginUser.Name)
             res, err := http.PostForm("/api/v1/users/logout", url.Values{
                 "user": {c.loginUser.Name},
             })
@@ -232,6 +253,20 @@ func (c *Poker) StartVote() {
 func (c *Poker) CastVote(vote string) {
     println("casting vote", vote)
     c.loginUser.Vote = vote
+    go func() {
+        res, err := http.PostForm("/api/v1/vote", url.Values{
+            "user": {c.loginUser.Name},
+            "vote": {vote},
+        })
+        if err != nil {
+            log.Printf("Error posting cast vote: %v", err)
+            return
+        }
+        defer res.Body.Close()
+        if body,err := ioutil.ReadAll(res.Body); err == nil {
+            log.Printf("Cast Vote Response: %v", string(body))
+        }
+    }()
 
 }
 
