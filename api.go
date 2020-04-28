@@ -17,11 +17,9 @@ func (d *DataModel) RequestMatch(r *http.Request) bool {
 func (d *DataModel) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		// adding a change here to test git autologin
 		println(time.Now().String(), r.RemoteAddr, "GET", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(d)
-
 	case http.MethodPost:
 		println(time.Now().String(), r.RemoteAddr, "POST", r.URL.Path)
 		switch {
