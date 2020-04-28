@@ -66,6 +66,7 @@ func (d *DataModel) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			state := r.FormValue("state")
 			w.Header().Set("Content-Type", "text/html")
 			w.Write([]byte(fmt.Sprintf(`{"%v": "%v"}`, state, user)))
+			d.Topic = ""
 			d.SetState(StateSetTopic)
 		case strings.HasSuffix(r.URL.Path, "/topic"):
 			if err := r.ParseForm(); err != nil {
@@ -102,9 +103,10 @@ func (d *DataModel) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (d *DataModel) UserView(username string) *DataModel {
 	newd := &DataModel{
-		State: d.State,
-		Topic: d.Topic,
-		Users: make([]*User, len(d.Users)),
+		State:  d.State,
+		Topic:  d.Topic,
+		Users:  make([]*User, len(d.Users)),
+		Reveal: true,
 	}
 	anyBlank := false
 	for k, v := range d.Users {
@@ -124,6 +126,8 @@ func (d *DataModel) UserView(username string) *DataModel {
 				v.Vote = "?"
 			}
 		}
+		newd.Reveal = false
 	}
+
 	return newd
 }
