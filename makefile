@@ -22,3 +22,6 @@ bastille: dist
 	doas bastille cp poker ./poker /usr/local/bin
 	doas bastille cp poker ./config.toml /usr/local/etc/poker.toml
 	cd dist && doas bastille cp poker . /var/www/poker
+
+tinydist:
+	tinygo build -o dist/tinymain.wasm -target wasm ./main_wasm.go

@@ -1,8 +1,5 @@
+sitename = "VuGu Planning Poker"
 users = [
-    "Aravind",
-    "Frank",
-    "Jason",
-    "Toby",
-    "Tom",
-    "Steve",
+    "Jack",
+    "Sue",
 ]

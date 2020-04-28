@@ -102,10 +102,11 @@ func (d *DataModel) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (d *DataModel) UserView(username string) *DataModel {
 	newd := &DataModel{
-		State:  d.State,
-		Topic:  d.Topic,
-		Users:  make([]*User, len(d.Users)),
-		Reveal: true,
+		Sitename: d.Sitename,
+		State:    d.State,
+		Topic:    d.Topic,
+		Users:    make([]*User, len(d.Users)),
+		Reveal:   true,
 	}
 	anyBlank := false
 	for k, v := range d.Users {

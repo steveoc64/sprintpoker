@@ -2,7 +2,7 @@
     <main role="main" class="container text-center">
         <div class="jumbotron shadow-lg">
             <img src="poker.png" class="grow">
-            <h1 class="display-4 title">A*Team Planning Poker</h1>
+            <h1 class="display-4 title" vg-html='c.Sitename'></h1>
             <hr class="my-4">
 
             <vg-comp expr="c.ActivePanel()"></vg-comp>
@@ -58,6 +58,7 @@ const (
 
 // Poker Struct
 type Poker struct {
+    Sitename     string `json:"sitename"`
 	State        AppState `json:"state"`
     Topic        string `json:"topic"`
 	Users        []*User `vugu:"users" json:"users"`
@@ -115,6 +116,7 @@ func (c *Poker) Load() {
             loginStatus = c.loginUser.Status
         }
         c.loginUser = nil
+        c.Sitename = p.Sitename
         c.State = p.State
         c.Topic = p.Topic
         c.Users = p.Users

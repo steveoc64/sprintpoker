@@ -9,6 +9,7 @@ import (
 )
 
 type DataModel struct {
+	Sitename  string      `json:"sitename"`
 	State     AppState    `json:"state"`
 	Topic     string      `json:"topic"`
 	Users     []*User     `json:"users"`
@@ -31,6 +32,7 @@ func NewDataModel() *DataModel {
 			Name: v.(string),
 		})
 	}
+	d.Sitename, _ = config["sitename"].(string)
 	return d
 }
 

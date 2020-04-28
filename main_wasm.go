@@ -37,7 +37,7 @@ func main() {
 
 	home := js.Global().Get("window").Get("location").Get("href").String()
 	fmt.Printf("home is %+v\n", home)
-	wsURL := strings.Replace(strings.Replace(home, "http://", "ws://", 1), "#", "ws", -1)
+	wsURL := strings.Replace(strings.Replace(home, "http://", "ws://", 1), "#", "", -1) + "ws"
 
 	ws := js.Global().Get("WebSocket")
 	fmt.Printf("ws %T %v\n", ws, ws)

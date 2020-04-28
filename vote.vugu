@@ -22,8 +22,15 @@
         @click='c.CastVote()'>
         Cast Vote
     </a>
-    <a class="btn btn-danger btn-lg"
+    <a class="btn btn-primary btn-lg"
+        href="#"
         vg-if="c.app.Reveal"
+        role="button"
+        @click='c.CastVote()'>
+        Update Vote
+    </a>
+    <a class="btn btn-danger btn-lg"
+        vg-if="c.AllMatch()"
         href="#"
         role="button"
         @click='c.NextTopic()'>
@@ -60,6 +67,9 @@ func (c *Vote) Users() []*User {
 
 func (c *Vote) UserStyle(user *User) string {
     if user == c.app.loginUser {
+        if user.Vote == "" {
+            return " text-danger"
+        }
         return " text-info"
     }
     if user.Vote == "" {
@@ -74,5 +84,21 @@ func (c *Vote) CastVote() {
 
 func (c *Vote) NextTopic() {
     c.app.NextTopic()
+}
+
+func (c *Vote) AllMatch() bool {
+    if !c.app.Reveal {
+        return false
+    }
+    mustMatch := ""
+    for _,v := range c.app.Users {
+        if mustMatch == "" {
+            mustMatch = v.Vote
+        }
+        if v.Vote != mustMatch {
+            return false
+        }
+    }
+    return true
 }
 </script>
