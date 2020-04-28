@@ -66,7 +66,6 @@ func (d *DataModel) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			state := r.FormValue("state")
 			w.Header().Set("Content-Type", "text/html")
 			w.Write([]byte(fmt.Sprintf(`{"%v": "%v"}`, state, user)))
-			d.Topic = ""
 			d.SetState(StateSetTopic)
 		case strings.HasSuffix(r.URL.Path, "/topic"):
 			if err := r.ParseForm(); err != nil {

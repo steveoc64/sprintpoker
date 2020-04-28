@@ -17,9 +17,17 @@
     <p></p>
     <a class="btn btn-success btn-lg"
         href="#"
+        vg-if="!c.app.Reveal"
         role="button"
         @click='c.CastVote()'>
         Cast Vote
+    </a>
+    <a class="btn btn-danger btn-lg"
+        vg-if="c.app.Reveal"
+        href="#"
+        role="button"
+        @click='c.NextTopic()'>
+        Next Topic
     </a>
 </div>
 
@@ -62,5 +70,9 @@ func (c *Vote) UserStyle(user *User) string {
 
 func (c *Vote) CastVote() {
     c.app.CastVote(c.vote)
+}
+
+func (c *Vote) NextTopic() {
+    c.app.NextTopic()
 }
 </script>

@@ -61,6 +61,7 @@ type Poker struct {
 	State        AppState `json:"state"`
     Topic        string `json:"topic"`
 	Users        []*User `vugu:"users" json:"users"`
+    Reveal       bool `json:"reveal"`
     Panel        map[AppState]vugu.Builder
     built        bool
     loginUser    *User
@@ -117,6 +118,7 @@ func (c *Poker) Load() {
         c.State = p.State
         c.Topic = p.Topic
         c.Users = p.Users
+        c.Reveal = p.Reveal
         gotOne := false
         for _,v := range c.Users {
             if v.Name == loginName {
@@ -189,8 +191,9 @@ func (c *Poker) Logout() {
     }()
 }
 
-func (c *Poker) StartNow() {
+func (c *Poker) NextTopic() {
     c.State = StateSetTopic
+    c.Topic = ""
     go func() {
         res, err := http.PostForm("/api/v1/start/topic", url.Values{
             "user": {c.loginUser.Name},

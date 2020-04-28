@@ -12,6 +12,7 @@ type DataModel struct {
 	State     AppState    `json:"state"`
 	Topic     string      `json:"topic"`
 	Users     []*User     `json:"users"`
+	Reveal    bool        `json:"reveal"`
 	listeners []chan bool `json:"-"`
 }
 
@@ -70,6 +71,13 @@ func (d *DataModel) AppendUser(user *User) {
 
 func (d *DataModel) SetState(state AppState) {
 	d.State = state
+	if state == StateSetTopic {
+		d.Topic = ""
+		d.Reveal = false
+		for _, v := range d.Users {
+			v.Vote = ""
+		}
+	}
 	d.Update("state")
 }
 
