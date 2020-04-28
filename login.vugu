@@ -55,7 +55,7 @@ func (c *Login) Login(event vugu.DOMEvent) {
 func (c *Login) ActiveClass(user *User) string {
     class := ""
     if user.Status {
-        class = class + " text-success"
+        class = class + " text-primary"
     }
 	if user == c.User {
 		class = class + " active"
