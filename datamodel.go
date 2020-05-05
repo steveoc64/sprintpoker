@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
-	"github.com/davecgh/go-spew/spew"
 )
 
 type DataModel struct {
@@ -50,7 +49,6 @@ func NewDataModel() *DataModel {
 		}
 	}
 	d.Sitename, _ = config["sitename"].(string)
-	spew.Dump(d.Users)
 	return d
 }
 
