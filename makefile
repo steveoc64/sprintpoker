@@ -33,6 +33,9 @@ bastille-config:
 bastille-log:
 	doas bastille cmd poker tail -f /var/log/poker.log
 
+bastille-restart:
+	doas bastille cmd poker killall poker
+
 #only need to do this once
 bastille-boot: bastille
 	doas bastille cmd poker mkdir -p /var/www/poker
