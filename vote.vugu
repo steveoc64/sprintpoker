@@ -30,7 +30,7 @@
         Update Vote
     </a>
     <a class="btn btn-danger btn-lg"
-        vg-if="c.AllMatch()"
+        vg-if="c.AllMatch() && c.IsAdmin()"
         href="#"
         role="button"
         @click='c.NextTopic()'>
@@ -63,6 +63,10 @@ type Vote struct {
 
 func (c *Vote) Users() []*User {
     return c.app.Users
+}
+
+func (c *Vote) IsAdmin() bool {
+    return c.app.IsAdmin()
 }
 
 func (c *Vote) UserStyle(user *User) string {

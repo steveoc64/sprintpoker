@@ -4,8 +4,10 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/BurntSushi/toml"
+	"github.com/davecgh/go-spew/spew"
 )
 
 type DataModel struct {
@@ -27,12 +29,28 @@ func NewDataModel() *DataModel {
 			return d
 		}
 	}
+	anyAdmin := false
 	for _, v := range config["users"].([]interface{}) {
+		name := v.(string)
+		isAdmin := false
+		if strings.HasPrefix(name, "*") {
+			name = name[1:]
+			isAdmin = true
+			anyAdmin = true
+		}
 		d.Users = append(d.Users, &User{
-			Name: v.(string),
+			Name:  name,
+			Admin: isAdmin,
 		})
 	}
+	if !anyAdmin {
+		// then all are admin
+		for _, v := range d.Users {
+			v.Admin = true
+		}
+	}
 	d.Sitename, _ = config["sitename"].(string)
+	spew.Dump(d.Users)
 	return d
 }
 

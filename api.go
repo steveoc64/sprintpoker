@@ -113,6 +113,7 @@ func (d *DataModel) UserView(username string) *DataModel {
 		newd.Users[k] = &User{
 			Name:   v.Name,
 			Status: v.Status,
+			Admin:  v.Admin,
 			Vote:   v.Vote,
 		}
 		if v.Status && v.Vote == "" {

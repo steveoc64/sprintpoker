@@ -15,6 +15,7 @@
     <a class="btn btn-success btn-lg"
         href="#"
         role="button"
+        vg-if="c.IsAdmin()"
         @click='c.StartNow(event)'>
         Start Now
     </a>
@@ -55,6 +56,12 @@ import "strings"
 type Wait struct {
     app *Poker
     adding bool
+}
+
+func (c *Wait) IsAdmin() bool {
+    x := c.app.IsAdmin()
+    println("got", x)
+    return c.app.IsAdmin()
 }
 
 func (c *Wait) Users() []*User {

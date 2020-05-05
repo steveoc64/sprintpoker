@@ -86,6 +86,13 @@ func NewPoker(repaintQ chan bool) *Poker {
     return c
 }
 
+func (c *Poker) IsAdmin() bool {
+    if c.loginUser != nil && c.loginUser.Admin {
+        return true
+    }
+    return false
+}
+
 func (c *Poker) ActivePanel() vugu.Builder {
     return c.Panel[c.State]
 }

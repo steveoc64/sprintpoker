@@ -26,6 +26,13 @@ bastille: build
 	doas bastille cmd poker killall poker
 	doas bastille cp poker ./poker /usr/local/bin
 
+bastille-config:
+	doas bastille cmd poker vi /usr/local/etc/poker.toml
+	doas bastille cmd poker killall poker
+
+bastille-log:
+	doas bastille cmd poker tail -f /var/log/poker.log
+
 #only need to do this once
 bastille-boot: bastille
 	doas bastille cmd poker mkdir -p /var/www/poker
