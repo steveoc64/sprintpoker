@@ -59,8 +59,6 @@ type Wait struct {
 }
 
 func (c *Wait) IsAdmin() bool {
-    x := c.app.IsAdmin()
-    println("got", x)
     return c.app.IsAdmin()
 }
 

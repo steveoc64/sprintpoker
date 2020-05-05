@@ -96,11 +96,14 @@ func (c *Vote) AllMatch() bool {
     }
     mustMatch := ""
     for _,v := range c.app.Users {
-        if mustMatch == "" {
-            mustMatch = v.Vote
-        }
-        if v.Vote != mustMatch {
-            return false
+        if v.Status {
+            if mustMatch == "" {
+                mustMatch = v.Vote
+            }
+            if v.Vote != mustMatch {
+                println("no match", v.Vote, "=", mustMatch)
+                return false
+            }
         }
     }
     return true
