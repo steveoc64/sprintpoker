@@ -36,7 +36,7 @@ func main() {
 	poker := NewPoker(repaintQ)
 
 	home := js.Global().Get("window").Get("location").Get("href").String()
-	wsURL := strings.Replace(strings.Replace(home, "http://", "ws://", 1), "#", "", -1) + "ws"
+	wsURL := strings.Replace(strings.Replace(home, "https://", "wss://", 1), "#", "", -1) + "ws"
 
 	ws := js.Global().Get("WebSocket")
 	wss := ws.New(wsURL)
